@@ -17,6 +17,7 @@ dependencies = [
     "tqdm>=4.66",
     "pandas>=2.1",
     "rich>=13.0",
+    "plotly>=5.20",
 ]
 
 [build-system]

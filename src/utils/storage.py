@@ -64,10 +64,11 @@ def init_db(conn: sqlite3.Connection | None = None):
         );
 
         CREATE TABLE IF NOT EXISTS clusters (
-            site_id     INTEGER PRIMARY KEY REFERENCES sites(id),
+            site_id     INTEGER NOT NULL REFERENCES sites(id),
             run_id      TEXT NOT NULL,
             cluster_id  INTEGER NOT NULL,
-            probability REAL
+            probability REAL,
+            PRIMARY KEY (site_id, run_id)
         );
 
         CREATE TABLE IF NOT EXISTS style_labels (
@@ -279,6 +280,33 @@ def get_all_style_labels(conn: sqlite3.Connection, run_id: str) -> list[sqlite3.
     return conn.execute(
         "SELECT * FROM style_labels WHERE run_id=? ORDER BY cluster_id",
         (run_id,),
+    ).fetchall()
+
+
+# ── UMAP coord helpers ─────────────────────────────────────────────────
+
+def store_umap_coords(conn: sqlite3.Connection, run_id: str,
+                      site_ids: list[int], coords_2d: np.ndarray) -> None:
+    """Persist 2D UMAP visualization coordinates for each site."""
+    with transaction(conn):
+        conn.executemany(
+            """INSERT INTO umap_coords (site_id, run_id, x_2d_0, x_2d_1)
+               VALUES (?, ?, ?, ?)
+               ON CONFLICT(site_id) DO UPDATE SET
+                 run_id=excluded.run_id,
+                 x_2d_0=excluded.x_2d_0,
+                 x_2d_1=excluded.x_2d_1""",
+            [
+                (int(sid), run_id, float(coords_2d[i, 0]), float(coords_2d[i, 1]))
+                for i, sid in enumerate(site_ids)
+            ],
+        )
+
+
+def get_umap_coords(conn: sqlite3.Connection) -> list[sqlite3.Row]:
+    """Return all stored 2D UMAP coordinates (most recent run per site)."""
+    return conn.execute(
+        "SELECT site_id, x_2d_0, x_2d_1 FROM umap_coords"
     ).fetchall()
 
 

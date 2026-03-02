@@ -13,7 +13,7 @@ from rich.table import Table
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
 import config
-from src.utils.storage import get_connection, init_db, get_all_embeddings, store_clusters
+from src.utils.storage import get_connection, init_db, get_all_embeddings, store_clusters, store_umap_coords
 from src.embed.reduction import reduce_for_clustering, reduce_for_visualization
 from src.cluster.hdbscan_cluster import cluster_embeddings, get_cluster_stats
 
@@ -52,6 +52,8 @@ def main():
     console.print("[yellow]Running UMAP → 2D for visualization...[/]")
     reduced_viz = reduce_for_visualization(embeddings)
     np.save(config.UMAP_2D_PATH, reduced_viz)
+    store_umap_coords(conn, run_id, site_ids, reduced_viz)
+    console.print("[dim]2D UMAP coords saved to database.[/]")
 
     # HDBSCAN clustering
     console.print(f"[yellow]Running HDBSCAN (min_cluster_size={args.min_cluster_size})...[/]")
