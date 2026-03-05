@@ -19,7 +19,7 @@ The corpus is intended for agent systems and MCP servers that need better visual
   - schema-validated records
   - explicit governance/quality fields
 
-In practice (as used in the `Superpowering-Agents` MCP workflow), this corpus supports:
+In practice (as used in the `Superpowering-Agents` MCP workflow: https://github.com/Shriram-Vasudevan/Superpowering-Agents), this corpus supports:
 - reference-backed context building (`superpower_context`)
 - targeted retrieval (`superpower_retrieve`)
 - reference-guided code generation (`superpower_generate`)
