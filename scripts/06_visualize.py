@@ -691,7 +691,7 @@ def render_html(df: pd.DataFrame, run_id: str, output_path: Path) -> None:
         heatmap_div = (
             "<p style='color:#8d8d92; padding:2rem; text-align:center; font-size:0.85rem;'>"
             "Not enough category variety to show a heatmap.<br/>"
-            "Add <code>category_hint</code> values to <code>seeds.csv</code>.</p>"
+            "Add <code>category_hint</code> values to <code>data/sources/website_urls.csv</code>.</p>"
         )
 
     # Embed Plotly.js once, as a CDN script tag (keeps file small)

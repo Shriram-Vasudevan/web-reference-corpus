@@ -1,5 +1,5 @@
 """
-Scrape curated website lists from multiple sources to build a ~5,000-site seed list.
+Scrape curated website lists from multiple sources to build a ~5,000-site website URL list.
 
 Sources:
   1. Y Combinator company directory (ycombinator.com/companies)
@@ -8,7 +8,7 @@ Sources:
   4. Godly.website curated designs
 
 Usage:
-    python scripts/00_build_seeds.py [--out seeds_large.csv] [--target 5000]
+    python scripts/00_build_seeds.py [--out data/sources/website_urls_large.csv] [--target 5000]
 """
 
 import argparse
@@ -738,7 +738,7 @@ def deduplicate(all_results: list[tuple[str, str]], existing_csv: Path | None = 
     seen_domains = set()
     deduped = OrderedDict()
 
-    # Load existing seeds first so they take priority
+    # Load existing website URLs first so they take priority
     if existing_csv and existing_csv.exists():
         with open(existing_csv) as f:
             reader = csv.DictReader(f)
@@ -762,10 +762,14 @@ def deduplicate(all_results: list[tuple[str, str]], existing_csv: Path | None = 
 
 
 def main():
-    parser = argparse.ArgumentParser(description="Build seed URL list from curated sources")
-    parser.add_argument("--out", default="seeds_large.csv", help="Output CSV path")
+    parser = argparse.ArgumentParser(description="Build website URL list from curated sources")
+    parser.add_argument("--out", default="data/sources/website_urls_large.csv", help="Output CSV path")
     parser.add_argument("--target", type=int, default=5000, help="Target number of URLs")
-    parser.add_argument("--existing", default="seeds.csv", help="Existing seeds CSV to preserve")
+    parser.add_argument(
+        "--existing",
+        default="data/sources/website_urls.csv",
+        help="Existing website URL CSV to preserve",
+    )
     parser.add_argument("--skip-scrape", action="store_true", help="Only use curated list (no web scraping)")
     args = parser.parse_args()
 
@@ -815,6 +819,7 @@ def main():
         print(f"  Consider adding more sources or increasing page limits")
 
     # Write output
+    out_path.parent.mkdir(parents=True, exist_ok=True)
     with open(out_path, "w", newline="") as f:
         writer = csv.writer(f)
         writer.writerow(["url", "category_hint"])

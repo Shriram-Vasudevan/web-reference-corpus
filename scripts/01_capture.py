@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Step 1: Capture screenshots for all seed URLs."""
+"""Step 1: Capture screenshots for all source website URLs."""
 
 import argparse
 import asyncio
@@ -22,21 +22,21 @@ from src.capture.screenshotter import capture_batch
 console = Console()
 
 
-def load_seeds() -> list[dict]:
-    """Load seed URLs from CSV."""
-    seeds = []
-    with open(config.SEEDS_PATH) as f:
+def load_website_urls() -> list[dict]:
+    """Load source website URLs from CSV."""
+    websites = []
+    with open(config.WEBSITE_URLS_PATH) as f:
         reader = csv.DictReader(f)
         for row in reader:
             url = row["url"].strip()
             if not url.startswith("http"):
                 url = f"https://{url}"
-            seeds.append({
+            websites.append({
                 "url": url,
                 "domain": urlparse(url).netloc.replace("www.", ""),
                 "category_hint": row.get("category_hint", "").strip() or None,
             })
-    return seeds
+    return websites
 
 
 def main():
@@ -49,10 +49,10 @@ def main():
     conn = get_connection()
     init_db(conn)
 
-    # Load and register seeds
-    seeds = load_seeds()
-    for seed in seeds:
-        upsert_site(conn, seed["url"], seed["domain"], seed["category_hint"])
+    # Load and register source URLs
+    websites = load_website_urls()
+    for website in websites:
+        upsert_site(conn, website["url"], website["domain"], website["category_hint"])
 
     # Determine which sites to capture
     if args.resume:

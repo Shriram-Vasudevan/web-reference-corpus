@@ -1,4 +1,9 @@
 data/
+!data/
+data/*
+!data/sources/
+data/sources/*
+!data/sources/*.csv
 outputs/
 .env
 __pycache__/

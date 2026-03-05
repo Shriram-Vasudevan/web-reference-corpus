@@ -5,13 +5,15 @@ from pathlib import Path
 # ── Paths ──────────────────────────────────────────────────────────────
 ROOT = Path(__file__).resolve().parent
 DATA_DIR = ROOT / "data"
+SOURCES_DIR = DATA_DIR / "sources"
 SCREENSHOTS_DIR = DATA_DIR / "screenshots"
 DB_PATH = DATA_DIR / "website_styles.db"
 EMBEDDINGS_PATH = DATA_DIR / "all_embeddings.npy"
 UMAP_20D_PATH = DATA_DIR / "umap_20d.npy"
 UMAP_2D_PATH = DATA_DIR / "umap_2d.npy"
 OUTPUTS_DIR = ROOT / "outputs"
-SEEDS_PATH = ROOT / "seeds.csv"
+WEBSITE_URLS_PATH = SOURCES_DIR / "website_urls.csv"
+SEEDS_PATH = WEBSITE_URLS_PATH
 
 # ── Screenshot capture ─────────────────────────────────────────────────
 VIEWPORT_WIDTH = 1440
@@ -49,5 +51,5 @@ LABEL_MAX_RETRIES = 3
 DEFAULT_TOP_K = 10
 
 # Ensure directories exist
-for d in [DATA_DIR, SCREENSHOTS_DIR, OUTPUTS_DIR]:
+for d in [DATA_DIR, SOURCES_DIR, SCREENSHOTS_DIR, OUTPUTS_DIR]:
     d.mkdir(parents=True, exist_ok=True)
