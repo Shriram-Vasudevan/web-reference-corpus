@@ -92,12 +92,34 @@ Comparison:
   --output-md outputs/eval_reference_impact.md
 ```
 
+## Eval Automation
+
+If you already have two generation commands (baseline and reference-backed), you can auto-build eval files:
+
+```bash
+./.venv/bin/python scripts/build_eval_outputs.py \
+  --prompts-file evals/prompts.example.jsonl \
+  --baseline-cmd 'cd /path/to/runner && ./run_baseline.sh {prompt_json}' \
+  --reference-cmd 'cd /path/to/runner && ./run_reference.sh {prompt_json}' \
+  --baseline-out evals/baseline_outputs.generated.jsonl \
+  --reference-out evals/reference_outputs.generated.jsonl \
+  --print-each
+
+./.venv/bin/python scripts/eval_reference_impact.py \
+  --prompts-file evals/prompts.example.jsonl \
+  --baseline-file evals/baseline_outputs.generated.jsonl \
+  --reference-file evals/reference_outputs.generated.jsonl \
+  --output-json outputs/eval_reference_impact.json \
+  --output-md outputs/eval_reference_impact.md
+```
+
 ## Repository map
 
 - `scripts/export_for_llm.py`: exports cluster data into legacy or `schema-v1` records.
 - `scripts/ingest_reference_records.py`: imports external records and merges into corpus output.
 - `scripts/validate_corpus.py`: validates records against schema + controlled labels.
 - `scripts/05_retrieve.py`: retrieves top matching references for downstream prompting/orchestration.
+- `scripts/build_eval_outputs.py`: runs baseline/reference generation commands and writes eval-ready JSONL files.
 - `scripts/eval_reference_impact.py`: compares baseline outputs vs reference-backed outputs and reports win rate.
 - `schema.v1.json`: record contract for corpus entries.
 - `labels.v1.json`: controlled vocabulary for corpus dimensions.
