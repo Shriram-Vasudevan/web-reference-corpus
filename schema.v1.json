@@ -1,0 +1,642 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://example.org/web-reference-corpus/schema.v1.json",
+  "title": "Web Reference Corpus Record Schema v1",
+  "description": "Canonical schema for retrieval-time reference records used by coding agents.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "id",
+    "corpus",
+    "title",
+    "summary",
+    "problem",
+    "solution",
+    "labels",
+    "contracts",
+    "evidence",
+    "retrieval",
+    "governance"
+  ],
+  "properties": {
+    "id": {
+      "type": "string",
+      "description": "Stable unique identifier for this record.",
+      "pattern": "^[a-zA-Z0-9._:-]{8,}$"
+    },
+    "corpus": {
+      "type": "string",
+      "description": "Corpus bucket this record belongs to.",
+      "enum": [
+        "dom_semantics",
+        "component_contract",
+        "interaction_state_machine",
+        "edge_case_pattern",
+        "api_robustness",
+        "security_by_default",
+        "performance_budget",
+        "testing_archetype",
+        "migration_refactor",
+        "observability_ops",
+        "code_review_findings",
+        "incident_postmortem"
+      ]
+    },
+    "title": {
+      "type": "string",
+      "minLength": 3,
+      "maxLength": 160
+    },
+    "summary": {
+      "type": "string",
+      "minLength": 10,
+      "maxLength": 600
+    },
+    "problem": {
+      "type": "string",
+      "minLength": 10,
+      "maxLength": 4000
+    },
+    "solution": {
+      "type": "string",
+      "minLength": 10,
+      "maxLength": 12000
+    },
+    "anti_patterns": {
+      "type": "array",
+      "description": "Known bad approaches that often cause defects.",
+      "items": {
+        "type": "string",
+        "minLength": 2,
+        "maxLength": 500
+      },
+      "maxItems": 30,
+      "uniqueItems": true,
+      "default": []
+    },
+    "labels": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "domains",
+        "frameworks",
+        "risk_level",
+        "quality_axes",
+        "edge_cases",
+        "bug_class",
+        "scenario",
+        "interaction",
+        "confidence"
+      ],
+      "properties": {
+        "domains": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "enum": [
+              "frontend",
+              "backend",
+              "infra",
+              "mobile",
+              "data",
+              "platform",
+              "fullstack"
+            ]
+          },
+          "minItems": 1,
+          "maxItems": 6,
+          "uniqueItems": true
+        },
+        "frameworks": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 64
+          },
+          "minItems": 1,
+          "maxItems": 20,
+          "uniqueItems": true
+        },
+        "risk_level": {
+          "type": "string",
+          "enum": [
+            "low",
+            "medium",
+            "high"
+          ]
+        },
+        "quality_axes": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "enum": [
+              "correctness",
+              "security",
+              "performance",
+              "a11y",
+              "maintainability",
+              "operability"
+            ]
+          },
+          "minItems": 1,
+          "maxItems": 6,
+          "uniqueItems": true
+        },
+        "edge_cases": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "enum": [
+              "null_data",
+              "empty_data",
+              "slow_network",
+              "timeout",
+              "offline",
+              "partial_failure",
+              "race_condition",
+              "stale_cache",
+              "pagination_drift",
+              "clock_skew",
+              "permission_change",
+              "duplicate_submission",
+              "resource_exhaustion"
+            ]
+          },
+          "minItems": 1,
+          "maxItems": 12,
+          "uniqueItems": true
+        },
+        "bug_class": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "enum": [
+              "logic_error",
+              "race_condition",
+              "data_loss",
+              "auth_bypass",
+              "xss",
+              "csrf",
+              "ssrf",
+              "sql_injection",
+              "n_plus_one",
+              "memory_leak",
+              "resource_leak",
+              "state_desync"
+            ]
+          },
+          "minItems": 1,
+          "maxItems": 12,
+          "uniqueItems": true
+        },
+        "scenario": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "enum": [
+              "happy_path",
+              "degraded",
+              "partial_failure",
+              "offline",
+              "migration"
+            ]
+          },
+          "minItems": 1,
+          "maxItems": 5,
+          "uniqueItems": true
+        },
+        "interaction": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "enum": [
+              "form_submit",
+              "optimistic_update",
+              "streaming",
+              "pagination",
+              "realtime",
+              "upload",
+              "search",
+              "auth_flow",
+              "navigation",
+              "webhook"
+            ]
+          },
+          "minItems": 1,
+          "maxItems": 10,
+          "uniqueItems": true
+        },
+        "confidence": {
+          "type": "string",
+          "enum": [
+            "gold",
+            "silver",
+            "bronze"
+          ]
+        }
+      }
+    },
+    "artifacts": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "code": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/codeArtifact"
+          },
+          "maxItems": 20,
+          "default": []
+        },
+        "tests": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/testArtifact"
+          },
+          "maxItems": 20,
+          "default": []
+        },
+        "dom": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/domArtifact"
+          },
+          "maxItems": 20,
+          "default": []
+        },
+        "state_graph": {
+          "$ref": "#/$defs/stateGraph"
+        }
+      },
+      "default": {}
+    },
+    "contracts": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "inputs",
+        "outputs",
+        "invariants",
+        "failure_modes"
+      ],
+      "properties": {
+        "inputs": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/ioContract"
+          },
+          "maxItems": 50,
+          "default": []
+        },
+        "outputs": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/ioContract"
+          },
+          "maxItems": 50,
+          "default": []
+        },
+        "invariants": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 2,
+            "maxLength": 400
+          },
+          "minItems": 1,
+          "maxItems": 30,
+          "uniqueItems": true
+        },
+        "failure_modes": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 2,
+            "maxLength": 500
+          },
+          "minItems": 1,
+          "maxItems": 50,
+          "uniqueItems": true
+        }
+      }
+    },
+    "evidence": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "source_type",
+        "source_ref",
+        "validation"
+      ],
+      "properties": {
+        "source_type": {
+          "type": "string",
+          "enum": [
+            "production",
+            "oss",
+            "internal",
+            "incident",
+            "benchmark",
+            "spec"
+          ]
+        },
+        "source_ref": {
+          "type": "string",
+          "minLength": 3,
+          "maxLength": 1024
+        },
+        "validation": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "enum": [
+              "lint_pass",
+              "tests_pass",
+              "typecheck_pass",
+              "security_check_pass",
+              "perf_budget_pass",
+              "a11y_check_pass",
+              "manual_review_pass"
+            ]
+          },
+          "minItems": 1,
+          "maxItems": 10,
+          "uniqueItems": true
+        },
+        "metrics": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "before": {
+              "type": "object",
+              "additionalProperties": {
+                "$ref": "#/$defs/metricValue"
+              },
+              "default": {}
+            },
+            "after": {
+              "type": "object",
+              "additionalProperties": {
+                "$ref": "#/$defs/metricValue"
+              },
+              "default": {}
+            }
+          },
+          "default": {}
+        }
+      }
+    },
+    "retrieval": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "keywords",
+        "embedding_text",
+        "hard_filters",
+        "freshness"
+      ],
+      "properties": {
+        "keywords": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 64
+          },
+          "minItems": 1,
+          "maxItems": 64,
+          "uniqueItems": true
+        },
+        "embedding_text": {
+          "type": "string",
+          "description": "Compact textual projection used to generate vector embeddings.",
+          "minLength": 20,
+          "maxLength": 6000
+        },
+        "hard_filters": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 3,
+            "maxLength": 120
+          },
+          "maxItems": 32,
+          "uniqueItems": true,
+          "default": []
+        },
+        "freshness": {
+          "type": "string",
+          "format": "date"
+        }
+      }
+    },
+    "governance": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "owner",
+        "review_status",
+        "version",
+        "last_verified_at"
+      ],
+      "properties": {
+        "owner": {
+          "type": "string",
+          "minLength": 2,
+          "maxLength": 120
+        },
+        "review_status": {
+          "type": "string",
+          "enum": [
+            "draft",
+            "reviewed",
+            "approved"
+          ]
+        },
+        "version": {
+          "type": "string",
+          "pattern": "^v?[0-9]+\\.[0-9]+\\.[0-9]+$"
+        },
+        "last_verified_at": {
+          "type": "string",
+          "format": "date"
+        }
+      }
+    }
+  },
+  "$defs": {
+    "codeArtifact": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "path",
+        "language",
+        "snippet"
+      ],
+      "properties": {
+        "path": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 512
+        },
+        "language": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 64
+        },
+        "snippet": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 50000
+        }
+      }
+    },
+    "testArtifact": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "kind",
+        "snippet"
+      ],
+      "properties": {
+        "kind": {
+          "type": "string",
+          "enum": [
+            "unit",
+            "integration",
+            "e2e",
+            "property",
+            "a11y",
+            "load",
+            "security"
+          ]
+        },
+        "snippet": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 50000
+        }
+      }
+    },
+    "domArtifact": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "html"
+      ],
+      "properties": {
+        "html": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 200000
+        },
+        "a11y_notes": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 5000
+        }
+      }
+    },
+    "stateGraph": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "states",
+        "transitions"
+      ],
+      "properties": {
+        "states": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 120
+          },
+          "minItems": 1,
+          "maxItems": 200,
+          "uniqueItems": true
+        },
+        "transitions": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/transition"
+          },
+          "minItems": 1,
+          "maxItems": 1000
+        }
+      }
+    },
+    "transition": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "from",
+        "to",
+        "on"
+      ],
+      "properties": {
+        "from": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 120
+        },
+        "to": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 120
+        },
+        "on": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 240
+        }
+      }
+    },
+    "ioContract": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "name",
+        "type"
+      ],
+      "properties": {
+        "name": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 120
+        },
+        "type": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 200
+        },
+        "constraints": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 500
+        },
+        "guarantees": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 500
+        }
+      }
+    },
+    "metricValue": {
+      "oneOf": [
+        {
+          "type": "number"
+        },
+        {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 200
+        },
+        {
+          "type": "boolean"
+        }
+      ]
+    }
+  }
+}

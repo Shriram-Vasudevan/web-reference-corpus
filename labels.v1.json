@@ -1,0 +1,184 @@
+{
+  "version": "v1.0.0",
+  "generated_at": "2026-03-04",
+  "description": "Label dictionaries for Web Reference Corpus retrieval and ranking.",
+  "dimensions": {
+    "corpus": [
+      "dom_semantics",
+      "component_contract",
+      "interaction_state_machine",
+      "edge_case_pattern",
+      "api_robustness",
+      "security_by_default",
+      "performance_budget",
+      "testing_archetype",
+      "migration_refactor",
+      "observability_ops",
+      "code_review_findings",
+      "incident_postmortem"
+    ],
+    "domains": [
+      "frontend",
+      "backend",
+      "infra",
+      "mobile",
+      "data",
+      "platform",
+      "fullstack"
+    ],
+    "quality_axes": [
+      "correctness",
+      "security",
+      "performance",
+      "a11y",
+      "maintainability",
+      "operability"
+    ],
+    "risk_level": [
+      "low",
+      "medium",
+      "high"
+    ],
+    "confidence": [
+      "gold",
+      "silver",
+      "bronze"
+    ],
+    "scenario": [
+      "happy_path",
+      "degraded",
+      "partial_failure",
+      "offline",
+      "migration"
+    ],
+    "interaction": [
+      "form_submit",
+      "optimistic_update",
+      "streaming",
+      "pagination",
+      "realtime",
+      "upload",
+      "search",
+      "auth_flow",
+      "navigation",
+      "webhook"
+    ],
+    "edge_cases": [
+      "null_data",
+      "empty_data",
+      "slow_network",
+      "timeout",
+      "offline",
+      "partial_failure",
+      "race_condition",
+      "stale_cache",
+      "pagination_drift",
+      "clock_skew",
+      "permission_change",
+      "duplicate_submission",
+      "resource_exhaustion"
+    ],
+    "bug_class": [
+      "logic_error",
+      "race_condition",
+      "data_loss",
+      "auth_bypass",
+      "xss",
+      "csrf",
+      "ssrf",
+      "sql_injection",
+      "n_plus_one",
+      "memory_leak",
+      "resource_leak",
+      "state_desync"
+    ],
+    "validation_signals": [
+      "lint_pass",
+      "tests_pass",
+      "typecheck_pass",
+      "security_check_pass",
+      "perf_budget_pass",
+      "a11y_check_pass",
+      "manual_review_pass"
+    ],
+    "review_status": [
+      "draft",
+      "reviewed",
+      "approved"
+    ]
+  },
+  "synonyms": {
+    "timeout": [
+      "request timeout",
+      "deadline exceeded",
+      "slow response"
+    ],
+    "race_condition": [
+      "concurrency bug",
+      "ordering issue",
+      "lost update"
+    ],
+    "data_loss": [
+      "dropped write",
+      "lost record",
+      "write omission"
+    ],
+    "auth_bypass": [
+      "authorization bypass",
+      "broken access control",
+      "privilege escalation"
+    ],
+    "xss": [
+      "cross-site scripting",
+      "script injection"
+    ],
+    "n_plus_one": [
+      "chatty query",
+      "repeated query loop"
+    ],
+    "offline": [
+      "no network",
+      "disconnected mode"
+    ],
+    "partial_failure": [
+      "degraded dependency",
+      "subset failure"
+    ],
+    "pagination_drift": [
+      "cursor drift",
+      "page inconsistency"
+    ],
+    "state_desync": [
+      "state mismatch",
+      "ui-backend divergence"
+    ]
+  },
+  "weights": {
+    "ranking": {
+      "semantic": 0.35,
+      "label_match": 0.25,
+      "test_coverage": 0.15,
+      "freshness": 0.1,
+      "incident_proven": 0.1,
+      "simplicity": 0.05
+    },
+    "quality_axis_priority": {
+      "correctness": 1.0,
+      "security": 1.0,
+      "performance": 0.8,
+      "operability": 0.75,
+      "a11y": 0.7,
+      "maintainability": 0.7
+    },
+    "confidence_multiplier": {
+      "gold": 1.0,
+      "silver": 0.85,
+      "bronze": 0.7
+    }
+  },
+  "policies": {
+    "max_results_per_bug_class": 2,
+    "min_confidence_preferred": "silver",
+    "fallback_if_no_gold": "return_draft_recommendation_with_extra_tests"
+  }
+}

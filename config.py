@@ -36,7 +36,7 @@ UMAP_MIN_DIST_VIZ = 0.1
 UMAP_N_NEIGHBORS = 15
 
 # ── HDBSCAN ────────────────────────────────────────────────────────────
-HDBSCAN_MIN_CLUSTER_SIZE = 8
+HDBSCAN_MIN_CLUSTER_SIZE = 5
 HDBSCAN_CLUSTER_SELECTION = "eom"
 NOISE_WARN_THRESHOLD = 0.30
 

@@ -98,17 +98,19 @@ def label_cluster(
             parsed = json.loads(json_text)
 
             # Validate required fields
-            required = ["umbrella_label"]
+            required = ["page_type", "visual_style", "quality_score"]
             if all(k in parsed for k in required):
-                # Normalize substyle_traits to comma-separated string if list
-                if isinstance(parsed.get("substyle_traits"), list):
-                    parsed["substyle_traits"] = ", ".join(parsed["substyle_traits"])
+                # Normalize distinguishing_features to comma-separated string if list
+                if isinstance(parsed.get("distinguishing_features"), list):
+                    parsed["distinguishing_features"] = ", ".join(parsed["distinguishing_features"])
+                # Ensure quality_score is int
+                parsed["quality_score"] = int(parsed["quality_score"])
                 return parsed, raw_text
 
-        except (json.JSONDecodeError, KeyError):
+        except (json.JSONDecodeError, KeyError, ValueError):
             if attempt < max_retries:
                 continue
             # Return best-effort on final attempt
-            return {"umbrella_label": "parse_error", "raw": raw_text}, raw_text
+            return {"page_type": "parse_error", "visual_style": "unknown", "quality_score": 0, "raw": raw_text}, raw_text
 
-    return {"umbrella_label": "error"}, ""
+    return {"page_type": "error", "visual_style": "unknown", "quality_score": 0}, ""

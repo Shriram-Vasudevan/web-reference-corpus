@@ -55,9 +55,10 @@ def main():
     results_table = Table(title="Cluster Labels")
     results_table.add_column("Cluster", justify="right")
     results_table.add_column("Size", justify="right")
-    results_table.add_column("Label")
-    results_table.add_column("Color Mode")
-    results_table.add_column("Layout")
+    results_table.add_column("Page Type")
+    results_table.add_column("Visual Style")
+    results_table.add_column("Quality", justify="center")
+    results_table.add_column("Industry")
 
     for cid in cluster_ids:
         # Skip if already labeled (unless --force)
@@ -66,9 +67,10 @@ def main():
             if existing:
                 results_table.add_row(
                     str(cid), "—",
-                    f"[dim]{existing['umbrella_label']}[/] (cached)",
-                    existing["color_mode"] or "—",
-                    existing["layout_structure"] or "—",
+                    f"[dim]{existing['page_type']}[/] (cached)",
+                    existing["visual_style"] or "—",
+                    str(existing["quality_score"]) if existing["quality_score"] else "—",
+                    existing["industry"] or "—",
                 )
                 continue
 
@@ -91,9 +93,10 @@ def main():
             store_style_label(conn, cid, run_id, label_data, raw)
             results_table.add_row(
                 str(cid), str(len(paths)),
-                label_data.get("umbrella_label", "—"),
-                label_data.get("color_mode", "—"),
-                label_data.get("layout_structure", "—"),
+                label_data.get("page_type", "—"),
+                label_data.get("visual_style", "—"),
+                str(label_data.get("quality_score", "—")),
+                label_data.get("industry", "—"),
             )
 
     console.print()

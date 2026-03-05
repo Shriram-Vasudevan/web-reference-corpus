@@ -27,15 +27,15 @@ from src.utils.storage import (
 
 console = Console()
 
-# Generous palette so every cluster gets a distinct color
+# Muted, sophisticated palette for white backgrounds
 _PALETTE = [
-    "#6366f1", "#8b5cf6", "#ec4899", "#f43f5e", "#f97316",
-    "#eab308", "#22c55e", "#10b981", "#06b6d4", "#3b82f6",
-    "#a855f7", "#d946ef", "#ef4444", "#f59e0b", "#84cc16",
-    "#14b8a6", "#0ea5e9", "#6d28d9", "#be185d", "#047857",
-    "#1d4ed8", "#b45309", "#7c3aed", "#db2777", "#0f766e",
+    "#1a1a2e", "#16213e", "#0f3460", "#533483", "#7b2d8e",
+    "#2d6a4f", "#40916c", "#1b4332", "#264653", "#2a9d8f",
+    "#6c584c", "#a98467", "#774936", "#3d405b", "#5f0f40",
+    "#9a031e", "#0b525b", "#065a60", "#3a0ca3", "#4361ee",
+    "#560bad", "#7209b7", "#b5179e", "#480ca8", "#023e8a",
 ]
-_NOISE_COLOR = "rgba(120, 120, 140, 0.35)"
+_NOISE_COLOR = "rgba(180, 180, 190, 0.45)"
 
 
 # ── Data loading ───────────────────────────────────────────────────────
@@ -82,10 +82,16 @@ def build_dataframe(conn, run_id: str) -> pd.DataFrame | None:
     for cid in [-1] + cluster_ids:
         members = get_cluster_members(conn, run_id, cid)
         lbl = label_map.get(cid, {})
-        style_name = (
-            lbl.get("umbrella_label") or
-            ("Noise / Outliers" if cid == -1 else f"Cluster {cid}")
-        )
+        page_type = lbl.get("page_type") or ""
+        visual_style = lbl.get("visual_style") or ""
+        quality = lbl.get("quality_score") or 0
+
+        if cid == -1:
+            style_name = "Noise / Outliers"
+        elif page_type and visual_style:
+            style_name = f"{page_type} — {visual_style}"
+        else:
+            style_name = f"Cluster {cid}"
 
         for m in members:
             sid = m["id"]
@@ -106,13 +112,15 @@ def build_dataframe(conn, run_id: str) -> pd.DataFrame | None:
                 "category": m["category_hint"] or "—",
                 "cluster_id": cid,
                 "style_name": style_name,
+                "page_type": page_type,
+                "visual_style": visual_style,
+                "quality_score": quality,
+                "industry": lbl.get("industry") or "",
                 "color_mode": lbl.get("color_mode") or "",
-                "visual_density": lbl.get("visual_density") or "",
+                "layout_pattern": lbl.get("layout_pattern") or "",
                 "typography": lbl.get("typography_style") or "",
-                "layout": lbl.get("layout_structure") or "",
-                "motion": lbl.get("motion_intensity") or "",
-                "energy": lbl.get("visual_energy") or "",
-                "substyle": lbl.get("substyle_traits") or "",
+                "design_era": lbl.get("design_era") or "",
+                "target_audience": lbl.get("target_audience") or "",
                 "screenshot_rel": shot,
                 "x": x,
                 "y": y,
@@ -136,11 +144,11 @@ def build_scatter(df: pd.DataFrame) -> go.Figure:
             y=noise["y"],
             mode="markers",
             name="Noise / Outliers",
-            marker=dict(size=5, color=_NOISE_COLOR, symbol="circle"),
+            marker=dict(size=4, color=_NOISE_COLOR, symbol="circle"),
             hovertemplate=(
                 "<b>%{customdata[0]}</b><br>"
                 "Category: %{customdata[1]}<br>"
-                "<span style='color:#888'>Noise — no cluster assigned</span>"
+                "<span style='color:#999'>Noise — no cluster assigned</span>"
                 "<extra></extra>"
             ),
             customdata=noise[["domain", "category", "screenshot_rel"]].values,
@@ -165,33 +173,32 @@ def build_scatter(df: pd.DataFrame) -> go.Figure:
             marker=dict(
                 size=7,
                 color=color,
-                opacity=0.85,
-                line=dict(width=0.5, color="rgba(255,255,255,0.3)"),
+                opacity=0.8,
+                line=dict(width=0.5, color="rgba(255,255,255,0.9)"),
             ),
             hovertemplate=(
                 "<b>%{customdata[0]}</b><br>"
-                "Category: %{customdata[1]}<br>"
-                "Style: <i>%{customdata[2]}</i><br>"
-                "Colors: %{customdata[3]}<br>"
-                "Layout: %{customdata[4]}<br>"
-                "Typography: %{customdata[5]}<br>"
+                "Page: %{customdata[1]} · Style: %{customdata[2]}<br>"
+                "Quality: %{customdata[3]}/5 · Industry: %{customdata[4]}<br>"
+                "Layout: %{customdata[5]} · Colors: %{customdata[6]}<br>"
                 "<extra></extra>"
             ),
             customdata=sub[[
-                "domain", "category", "style_name",
-                "color_mode", "layout", "typography", "screenshot_rel",
+                "domain", "page_type", "visual_style",
+                "quality_score", "industry", "layout_pattern",
+                "color_mode", "screenshot_rel",
             ]].values,
         ))
 
     fig.update_layout(
         paper_bgcolor="rgba(0,0,0,0)",
         plot_bgcolor="rgba(0,0,0,0)",
-        font=dict(color="#c9cdd8", family="Inter, system-ui, sans-serif", size=12),
+        font=dict(color="#1a1a2e", family="Inter, system-ui, sans-serif", size=12),
         legend=dict(
-            bgcolor="rgba(255,255,255,0.04)",
-            bordercolor="rgba(255,255,255,0.1)",
+            bgcolor="rgba(0,0,0,0)",
+            bordercolor="rgba(0,0,0,0.06)",
             borderwidth=1,
-            font=dict(size=11),
+            font=dict(size=11, color="#3d405b"),
             itemsizing="constant",
         ),
         xaxis=dict(showgrid=False, showticklabels=False, zeroline=False),
@@ -226,14 +233,14 @@ def build_bar(df: pd.DataFrame) -> go.Figure:
     fig.update_layout(
         paper_bgcolor="rgba(0,0,0,0)",
         plot_bgcolor="rgba(0,0,0,0)",
-        font=dict(color="#c9cdd8", family="Inter, system-ui, sans-serif", size=11),
+        font=dict(color="#3d405b", family="Inter, system-ui, sans-serif", size=11),
         xaxis=dict(
             showgrid=True,
-            gridcolor="rgba(255,255,255,0.07)",
-            color="#c9cdd8",
+            gridcolor="rgba(0,0,0,0.05)",
+            color="#3d405b",
             title="",
         ),
-        yaxis=dict(showgrid=False, color="#c9cdd8", automargin=True),
+        yaxis=dict(showgrid=False, color="#3d405b", automargin=True),
         margin=dict(l=10, r=10, t=10, b=10),
         height=max(300, 36 * len(counts)),
         hovermode="closest",
@@ -257,11 +264,11 @@ def build_heatmap(df: pd.DataFrame) -> go.Figure | None:
         z=pivot.values,
         x=pivot.columns.tolist(),
         y=pivot.index.tolist(),
-        colorscale="Purp",
+        colorscale=[[0, "#ffffff"], [0.25, "#e8e0f0"], [0.5, "#b8a9d4"], [0.75, "#6b4fa0"], [1, "#1a1a2e"]],
         hovertemplate="%{y} × %{x}: <b>%{z} sites</b><extra></extra>",
         showscale=True,
         colorbar=dict(
-            tickfont=dict(color="#c9cdd8"),
+            tickfont=dict(color="#3d405b"),
             outlinewidth=0,
         ),
     ))
@@ -269,9 +276,9 @@ def build_heatmap(df: pd.DataFrame) -> go.Figure | None:
     fig.update_layout(
         paper_bgcolor="rgba(0,0,0,0)",
         plot_bgcolor="rgba(0,0,0,0)",
-        font=dict(color="#c9cdd8", family="Inter, system-ui, sans-serif", size=10),
-        xaxis=dict(tickangle=-40, automargin=True, color="#c9cdd8"),
-        yaxis=dict(automargin=True, color="#c9cdd8"),
+        font=dict(color="#3d405b", family="Inter, system-ui, sans-serif", size=10),
+        xaxis=dict(tickangle=-40, automargin=True, color="#3d405b"),
+        yaxis=dict(automargin=True, color="#3d405b"),
         margin=dict(l=10, r=10, t=10, b=80),
         height=420,
     )
@@ -288,135 +295,162 @@ _HTML_TEMPLATE = """\
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Website Visual Style Atlas</title>
   <link rel="preconnect" href="https://fonts.googleapis.com"/>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap"
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap"
         rel="stylesheet"/>
+  {plotlyjs}
   <style>
     :root {{
-      --bg:        #0a0b0f;
-      --surface:   #111318;
-      --surface2:  #191c25;
-      --border:    rgba(255,255,255,0.08);
-      --text:      #e2e4ec;
-      --muted:     #6b7280;
-      --accent:    #6366f1;
-      --accent2:   #8b5cf6;
+      --bg:        #ffffff;
+      --surface:   #fafafa;
+      --surface2:  #f5f5f5;
+      --border:    rgba(0,0,0,0.08);
+      --border2:   rgba(0,0,0,0.04);
+      --text:      #1a1a2e;
+      --text-sec:  #3d405b;
+      --muted:     #8d8d92;
+      --accent:    #1a1a2e;
+      --accent2:   #3d405b;
     }}
     *, *::before, *::after {{ box-sizing: border-box; margin: 0; padding: 0; }}
     body {{
       background: var(--bg);
       color: var(--text);
-      font-family: "Inter", system-ui, sans-serif;
+      font-family: "Inter", system-ui, -apple-system, sans-serif;
       min-height: 100vh;
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
     }}
 
     /* ── Header ── */
     header {{
-      padding: 2rem 3rem 1.75rem;
-      border-bottom: 1px solid var(--border);
-      background: linear-gradient(160deg, #0d0e14 0%, #111318 100%);
+      padding: 4rem 4rem 3rem;
+      max-width: 1400px;
+      margin: 0 auto;
     }}
     header h1 {{
-      font-size: 1.9rem;
+      font-size: 3rem;
       font-weight: 700;
-      letter-spacing: -0.02em;
-      background: linear-gradient(135deg, var(--accent) 0%, var(--accent2) 100%);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-      background-clip: text;
+      letter-spacing: -0.035em;
+      color: var(--text);
+      line-height: 1.1;
+      max-width: 900px;
+    }}
+    header h1 span {{
+      color: var(--muted);
     }}
     header p {{
-      margin-top: 0.45rem;
+      margin-top: 1.25rem;
       color: var(--muted);
-      font-size: 0.88rem;
-      max-width: 780px;
-      line-height: 1.6;
+      font-size: 0.95rem;
+      max-width: 680px;
+      line-height: 1.7;
+      font-weight: 400;
+    }}
+    .tag-row {{
+      display: flex;
+      gap: 0.5rem;
+      margin-top: 1.5rem;
+      flex-wrap: wrap;
     }}
     .tag {{
       display: inline-block;
-      margin-top: 0.8rem;
-      background: rgba(99,102,241,0.15);
-      border: 1px solid rgba(99,102,241,0.35);
-      color: #a5b4fc;
-      font-size: 0.7rem;
-      font-weight: 600;
-      letter-spacing: 0.08em;
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      color: var(--text-sec);
+      font-size: 0.68rem;
+      font-weight: 500;
+      letter-spacing: 0.05em;
       text-transform: uppercase;
-      padding: 0.2rem 0.55rem;
-      border-radius: 999px;
-      margin-right: 0.4rem;
+      padding: 0.3rem 0.7rem;
+      border-radius: 4px;
+    }}
+
+    /* ── Divider ── */
+    .divider {{
+      border: none;
+      border-top: 1px solid var(--border);
+      margin: 0 4rem;
+      max-width: 1400px;
     }}
 
     /* ── Stats bar ── */
     .stats-bar {{
       display: flex;
       gap: 0;
-      background: var(--surface);
-      border-bottom: 1px solid var(--border);
+      max-width: 1400px;
+      margin: 0 auto;
+      padding: 0 4rem;
     }}
     .stat {{
       flex: 1;
-      padding: 1rem 1.5rem;
-      border-right: 1px solid var(--border);
-      text-align: center;
+      padding: 1.75rem 0;
+      text-align: left;
     }}
-    .stat:last-child {{ border-right: none; }}
     .stat .val {{
-      font-size: 1.6rem;
+      font-size: 2rem;
       font-weight: 700;
-      color: var(--accent);
-      letter-spacing: -0.02em;
+      color: var(--text);
+      letter-spacing: -0.03em;
     }}
     .stat .lbl {{
-      margin-top: 0.15rem;
-      font-size: 0.7rem;
-      font-weight: 600;
+      margin-top: 0.2rem;
+      font-size: 0.72rem;
+      font-weight: 500;
       color: var(--muted);
       text-transform: uppercase;
-      letter-spacing: 0.07em;
+      letter-spacing: 0.08em;
     }}
 
     /* ── Layout ── */
     main {{
-      max-width: 1600px;
-      padding: 2rem 3rem;
+      max-width: 1400px;
+      margin: 0 auto;
+      padding: 2.5rem 4rem 3rem;
     }}
     .section-label {{
-      font-size: 0.7rem;
+      font-size: 0.72rem;
       font-weight: 600;
       color: var(--muted);
       text-transform: uppercase;
       letter-spacing: 0.1em;
-      margin-bottom: 0.75rem;
+      margin-bottom: 1rem;
     }}
     .card {{
-      background: var(--surface);
+      background: var(--bg);
       border: 1px solid var(--border);
-      border-radius: 14px;
-      padding: 1.5rem;
-      margin-bottom: 1.5rem;
+      border-radius: 12px;
+      padding: 2rem;
+      margin-bottom: 2rem;
+      transition: box-shadow 0.2s ease;
+    }}
+    .card:hover {{
+      box-shadow: 0 4px 24px rgba(0,0,0,0.04);
     }}
     .two-col {{
       display: grid;
       grid-template-columns: 1fr 1fr;
-      gap: 1.5rem;
-      margin-bottom: 1.5rem;
+      gap: 2rem;
+      margin-bottom: 2rem;
     }}
     @media (max-width: 900px) {{
       .two-col {{ grid-template-columns: 1fr; }}
-      header, .stats-bar .stat, main {{ padding-left: 1rem; padding-right: 1rem; }}
+      header, main {{ padding-left: 1.5rem; padding-right: 1.5rem; }}
+      .stats-bar {{ padding: 0 1.5rem; }}
+      .divider {{ margin: 0 1.5rem; }}
+      header h1 {{ font-size: 2rem; }}
     }}
 
     /* ── Screenshot preview panel ── */
     #preview-panel {{
       display: none;
       position: fixed;
-      right: 1.5rem;
-      bottom: 1.5rem;
-      width: 320px;
-      background: var(--surface2);
+      right: 2rem;
+      bottom: 2rem;
+      width: 340px;
+      background: var(--bg);
       border: 1px solid var(--border);
-      border-radius: 14px;
-      box-shadow: 0 20px 60px rgba(0,0,0,0.6);
+      border-radius: 12px;
+      box-shadow: 0 24px 80px rgba(0,0,0,0.12), 0 4px 16px rgba(0,0,0,0.06);
       z-index: 9999;
       overflow: hidden;
     }}
@@ -424,7 +458,7 @@ _HTML_TEMPLATE = """\
       display: flex;
       align-items: center;
       justify-content: space-between;
-      padding: 0.75rem 1rem;
+      padding: 0.85rem 1.1rem;
       border-bottom: 1px solid var(--border);
     }}
     #preview-domain {{
@@ -441,10 +475,15 @@ _HTML_TEMPLATE = """\
       color: var(--muted);
       font-size: 1.1rem;
       cursor: pointer;
-      padding: 0 0.25rem;
+      padding: 0.2rem 0.35rem;
       line-height: 1;
+      border-radius: 6px;
+      transition: background 0.15s;
     }}
-    #preview-close:hover {{ color: var(--text); }}
+    #preview-close:hover {{
+      background: var(--surface2);
+      color: var(--text);
+    }}
     #preview-img {{
       width: 100%;
       display: block;
@@ -453,15 +492,21 @@ _HTML_TEMPLATE = """\
       background: var(--surface);
     }}
     #preview-meta {{
-      padding: 0.6rem 1rem;
-      font-size: 0.75rem;
+      padding: 0.75rem 1.1rem;
+      font-size: 0.78rem;
       color: var(--muted);
-      line-height: 1.6;
+      line-height: 1.7;
+    }}
+    #preview-meta b {{
+      color: var(--text-sec);
+      font-weight: 500;
     }}
 
     /* ── Footer ── */
     footer {{
-      padding: 1.5rem 3rem;
+      max-width: 1400px;
+      margin: 0 auto;
+      padding: 2rem 4rem;
       border-top: 1px solid var(--border);
       color: var(--muted);
       font-size: 0.78rem;
@@ -470,18 +515,28 @@ _HTML_TEMPLATE = """\
       flex-wrap: wrap;
       gap: 0.5rem;
     }}
+
+    /* ── Plotly overrides ── */
+    .js-plotly-plot .plotly .modebar {{
+      right: 8px !important;
+    }}
+    .js-plotly-plot .plotly .modebar-btn path {{
+      fill: var(--muted) !important;
+    }}
+    .js-plotly-plot .plotly .modebar-btn:hover path {{
+      fill: var(--text) !important;
+    }}
   </style>
 </head>
 <body>
 
 <header>
-  <h1>Website Visual Style Atlas</h1>
+  <h1>Visual Style Atlas across <span>{n_sites}</span> websites, clustered into <span>{n_clusters}</span> distinct style groups.</h1>
   <p>
-    UMAP projection of visual embeddings across <strong>{n_sites}</strong> websites,
-    clustered into <strong>{n_clusters}</strong> distinct style groups using
-    CLIP&nbsp;ViT-B/32&nbsp;+&nbsp;HDBSCAN, with clusters labelled by Claude&nbsp;VLM.
+    UMAP projection of CLIP ViT-B/32 visual embeddings, clustered with HDBSCAN,
+    and labelled by Claude VLM. Hover to explore. Click for screenshot preview.
   </p>
-  <div>
+  <div class="tag-row">
     <span class="tag">CLIP</span>
     <span class="tag">UMAP</span>
     <span class="tag">HDBSCAN</span>
@@ -489,6 +544,8 @@ _HTML_TEMPLATE = """\
     <span class="tag">Plotly</span>
   </div>
 </header>
+
+<hr class="divider"/>
 
 <div class="stats-bar">
   <div class="stat">
@@ -508,14 +565,16 @@ _HTML_TEMPLATE = """\
     <div class="lbl">Noise</div>
   </div>
   <div class="stat">
-    <div class="val">{run_id}</div>
+    <div class="val" style="font-size:1rem; padding-top:0.45rem;">{run_id}</div>
     <div class="lbl">Run ID</div>
   </div>
 </div>
 
+<hr class="divider"/>
+
 <main>
   <div class="card">
-    <div class="section-label">Visual Style Map — hover to explore · click for screenshot preview</div>
+    <div class="section-label">Visual Style Map</div>
     {scatter_div}
   </div>
 
@@ -525,7 +584,7 @@ _HTML_TEMPLATE = """\
       {bar_div}
     </div>
     <div class="card">
-      <div class="section-label">Category × Style Distribution</div>
+      <div class="section-label">Category &times; Style Distribution</div>
       {heatmap_div}
     </div>
   </div>
@@ -534,14 +593,12 @@ _HTML_TEMPLATE = """\
 <!-- Screenshot preview panel -->
 <div id="preview-panel">
   <div class="preview-header">
-    <span id="preview-domain">—</span>
-    <button id="preview-close">✕</button>
+    <span id="preview-domain">&mdash;</span>
+    <button id="preview-close">&times;</button>
   </div>
   <img id="preview-img" src="" alt="Screenshot"/>
   <div id="preview-meta"></div>
 </div>
-
-{plotlyjs}
 
 <script>
 (function () {{
@@ -560,22 +617,23 @@ _HTML_TEMPLATE = """\
       var pt = data.points[0];
       if (!pt || !pt.customdata) return;
       var cd = pt.customdata;
-      // cd: [domain, category, style_name, color_mode, layout, typography, screenshot_rel]
-      var domain  = cd[0] || "";
-      var cat     = cd[1] || "";
-      var style   = cd[2] || "";
-      var color   = cd[3] || "";
-      var layout  = cd[4] || "";
-      var typo    = cd[5] || "";
-      var imgPath = cd[6] || "";
+      var domain   = cd[0] || "";
+      var pageType = cd[1] || "";
+      var vStyle   = cd[2] || "";
+      var quality  = cd[3] || "";
+      var industry = cd[4] || "";
+      var layout   = cd[5] || "";
+      var color    = cd[6] || "";
+      var imgPath  = cd[7] || "";
 
       pDomain.textContent = domain;
       pMeta.innerHTML = [
-        cat     ? "<b>Category:</b> " + cat     : "",
-        style   ? "<b>Style:</b> "   + style   : "",
-        color   ? "<b>Color:</b> "   + color   : "",
-        layout  ? "<b>Layout:</b> "  + layout  : "",
-        typo    ? "<b>Type:</b> "    + typo    : "",
+        pageType ? "<b>Page:</b> " + pageType    : "",
+        vStyle   ? "<b>Style:</b> " + vStyle      : "",
+        quality  ? "<b>Quality:</b> " + quality + "/5" : "",
+        industry ? "<b>Industry:</b> " + industry : "",
+        layout   ? "<b>Layout:</b> " + layout     : "",
+        color    ? "<b>Color:</b> " + color       : "",
       ].filter(Boolean).join("<br/>");
 
       if (imgPath) {{
@@ -592,8 +650,8 @@ _HTML_TEMPLATE = """\
 </script>
 
 <footer>
-  <span>Generated {date} · Run ID: {run_id}</span>
-  <span>Pipeline: CLIP ViT-B/32 → UMAP (20D cluster / 2D viz) → HDBSCAN → Claude VLM labels</span>
+  <span>Generated {date} &middot; Run ID: {run_id}</span>
+  <span>CLIP ViT-B/32 &rarr; UMAP &rarr; HDBSCAN &rarr; Claude VLM</span>
 </footer>
 </body>
 </html>
@@ -631,7 +689,7 @@ def render_html(df: pd.DataFrame, run_id: str, output_path: Path) -> None:
         heatmap_div = _fig_to_div(heatmap_fig, "heatmap-fig", include_js=False)
     else:
         heatmap_div = (
-            "<p style='color:#6b7280; padding:2rem; text-align:center; font-size:0.85rem;'>"
+            "<p style='color:#8d8d92; padding:2rem; text-align:center; font-size:0.85rem;'>"
             "Not enough category variety to show a heatmap.<br/>"
             "Add <code>category_hint</code> values to <code>seeds.csv</code>.</p>"
         )

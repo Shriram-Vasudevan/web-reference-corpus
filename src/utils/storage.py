@@ -72,18 +72,20 @@ def init_db(conn: sqlite3.Connection | None = None):
         );
 
         CREATE TABLE IF NOT EXISTS style_labels (
-            cluster_id      INTEGER NOT NULL,
-            run_id          TEXT NOT NULL,
-            umbrella_label  TEXT NOT NULL,
-            substyle_traits TEXT,
-            visual_density  TEXT,
-            color_mode      TEXT,
-            typography_style TEXT,
-            layout_structure TEXT,
-            motion_intensity TEXT,
-            visual_energy   TEXT,
-            raw_response    TEXT,
-            created_at      TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            cluster_id          INTEGER NOT NULL,
+            run_id              TEXT NOT NULL,
+            page_type           TEXT NOT NULL,
+            visual_style        TEXT NOT NULL,
+            quality_score       INTEGER NOT NULL,
+            industry            TEXT,
+            color_mode          TEXT,
+            layout_pattern      TEXT,
+            typography_style    TEXT,
+            design_era          TEXT,
+            target_audience     TEXT,
+            distinguishing_features TEXT,
+            raw_response        TEXT,
+            created_at          TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
             PRIMARY KEY (cluster_id, run_id)
         );
 
@@ -235,31 +237,35 @@ def store_style_label(conn: sqlite3.Connection, cluster_id: int, run_id: str,
     """Store a style label for a cluster."""
     conn.execute(
         """INSERT INTO style_labels
-           (cluster_id, run_id, umbrella_label, substyle_traits, visual_density,
-            color_mode, typography_style, layout_structure, motion_intensity,
-            visual_energy, raw_response)
-           VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+           (cluster_id, run_id, page_type, visual_style, quality_score,
+            industry, color_mode, layout_pattern, typography_style,
+            design_era, target_audience, distinguishing_features, raw_response)
+           VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
            ON CONFLICT(cluster_id, run_id) DO UPDATE SET
-            umbrella_label=excluded.umbrella_label,
-            substyle_traits=excluded.substyle_traits,
-            visual_density=excluded.visual_density,
+            page_type=excluded.page_type,
+            visual_style=excluded.visual_style,
+            quality_score=excluded.quality_score,
+            industry=excluded.industry,
             color_mode=excluded.color_mode,
+            layout_pattern=excluded.layout_pattern,
             typography_style=excluded.typography_style,
-            layout_structure=excluded.layout_structure,
-            motion_intensity=excluded.motion_intensity,
-            visual_energy=excluded.visual_energy,
+            design_era=excluded.design_era,
+            target_audience=excluded.target_audience,
+            distinguishing_features=excluded.distinguishing_features,
             raw_response=excluded.raw_response,
             created_at=CURRENT_TIMESTAMP""",
         (
             cluster_id, run_id,
-            label_data.get("umbrella_label", ""),
-            label_data.get("substyle_traits", ""),
-            label_data.get("visual_density", ""),
+            label_data.get("page_type", ""),
+            label_data.get("visual_style", ""),
+            label_data.get("quality_score", 0),
+            label_data.get("industry", ""),
             label_data.get("color_mode", ""),
+            label_data.get("layout_pattern", ""),
             label_data.get("typography_style", ""),
-            label_data.get("layout_structure", ""),
-            label_data.get("motion_intensity", ""),
-            label_data.get("visual_energy", ""),
+            label_data.get("design_era", ""),
+            label_data.get("target_audience", ""),
+            label_data.get("distinguishing_features", ""),
             raw_response,
         ),
     )
