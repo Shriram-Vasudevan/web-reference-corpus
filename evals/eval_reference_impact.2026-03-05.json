@@ -1,0 +1,92 @@
+{
+  "config": {
+    "model": "claude-sonnet-4-20250514",
+    "seed": 42,
+    "max_cases": null,
+    "prompt_file": "evals/prompts.example.jsonl",
+    "source_mode": "files"
+  },
+  "summary": {
+    "total_cases": 3,
+    "decided_cases": 3,
+    "baseline_wins": 0,
+    "reference_wins": 3,
+    "ties": 0,
+    "reference_win_rate_all": 1.0,
+    "reference_win_rate_decided": 1.0
+  },
+  "results": [
+    {
+      "case_id": "space-1",
+      "prompt": "Build a marketing website for a commercial space mission platform. Include hero, mission stats, capability sections, and CTA. Style: dark theme, cinematic, high contrast, clean typography.",
+      "winner": "reference",
+      "winner_raw": "B",
+      "a_label": "baseline",
+      "b_label": "reference",
+      "confidence": 0.85,
+      "scores": {
+        "A": {
+          "visual_specificity": 3,
+          "layout_coherence": 3,
+          "implementation_detail": 3,
+          "non_genericness": 2
+        },
+        "B": {
+          "visual_specificity": 5,
+          "layout_coherence": 5,
+          "implementation_detail": 5,
+          "non_genericness": 5
+        }
+      },
+      "rationale": "Output B delivers superior cinematic experience with advanced Framer Motion animations, sophisticated typography hierarchy using Space Grotesk, animated star fields, floating orbital elements, and comprehensive testimonials section. More visually striking and professionally implemented."
+    },
+    {
+      "case_id": "automation-1",
+      "prompt": "Build a landing page for a workflow automation SaaS. Include hero, integrations, automation templates, pricing preview, and CTA. Style: light theme, crisp, modern, minimal.",
+      "winner": "reference",
+      "winner_raw": "B",
+      "a_label": "baseline",
+      "b_label": "reference",
+      "confidence": 0.8,
+      "scores": {
+        "A": {
+          "visual_specificity": 3,
+          "layout_coherence": 4,
+          "implementation_detail": 3,
+          "non_genericness": 3
+        },
+        "B": {
+          "visual_specificity": 5,
+          "layout_coherence": 5,
+          "implementation_detail": 5,
+          "non_genericness": 4
+        }
+      },
+      "rationale": "Output B demonstrates superior visual specificity with Framer Motion animations, actual image URLs, specific icons from Tabler, and detailed visual elements like floating stats cards. Layout is more sophisticated with asymmetric grids and better visual hierarchy."
+    },
+    {
+      "case_id": "cloud-1",
+      "prompt": "Build a website for a cloud infrastructure control plane product. Include hero, reliability/security highlights, architecture section, customer logos, and CTA. Style: dark theme, technical, structured, enterprise.",
+      "winner": "reference",
+      "winner_raw": "B",
+      "a_label": "baseline",
+      "b_label": "reference",
+      "confidence": 0.85,
+      "scores": {
+        "A": {
+          "visual_specificity": 3,
+          "layout_coherence": 3,
+          "implementation_detail": 3,
+          "non_genericness": 2
+        },
+        "B": {
+          "visual_specificity": 5,
+          "layout_coherence": 4,
+          "implementation_detail": 5,
+          "non_genericness": 5
+        }
+      },
+      "rationale": "Output B delivers superior visual specificity with dramatic typography scaling, technical terminal visualization, and sophisticated animations. More detailed implementation with custom fonts, motion variants, and enterprise-specific metrics. Less generic with unique architectural storytelling."
+    }
+  ]
+}

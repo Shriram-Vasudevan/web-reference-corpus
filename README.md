@@ -53,6 +53,26 @@ Comparison:
 <what improved with references>
 ```
 
+## Measured Results (March 5, 2026)
+
+Baseline vs reference-backed generation was run using `Superpowering-Agents` for three prompts:
+- `space-1` (dark cinematic space site)
+- `automation-1` (light software automation site)
+- `cloud-1` (dark cloud infrastructure site)
+
+Outcome:
+- Reference-backed wins: 3/3
+- Baseline wins: 0/3
+- Ties: 0/3
+- Reference win rate: 100%
+
+Artifacts:
+- prompts: `evals/prompts.example.jsonl`
+- baseline outputs: `evals/baseline_outputs.generated.jsonl`
+- reference outputs: `evals/reference_outputs.generated.jsonl`
+- eval summary: `evals/eval_reference_impact.2026-03-05.md`
+- eval JSON: `evals/eval_reference_impact.2026-03-05.json`
+
 ## Core workflow
 
 ```bash
