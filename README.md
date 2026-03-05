@@ -25,6 +25,34 @@ In practice (as used in the `Superpowering-Agents` MCP workflow), this corpus su
 - reference-guided code generation (`superpower_generate`)
 - primitive selection and planning layers on top of retrieved references
 
+## Examples
+
+Add concrete request/response examples here.
+
+Suggested structure for each example:
+- Prompt
+- Retrieved references (IDs or domains)
+- Generated output link/snippet
+- Why the reference-backed result is stronger than the no-reference version
+
+Template:
+
+```md
+### Example N: <short title>
+Prompt:
+<your prompt>
+
+Retrieved references:
+- <reference 1>
+- <reference 2>
+
+Result:
+<link or snippet>
+
+Comparison:
+<what improved with references>
+```
+
 ## Core workflow
 
 ```bash
@@ -54,6 +82,14 @@ In practice (as used in the `Superpowering-Agents` MCP workflow), this corpus su
   --risk-focus correctness \
   --stack web \
   --top-k 5 --json
+
+# 5) Evaluate baseline vs reference-assisted outputs
+./.venv/bin/python scripts/eval_reference_impact.py \
+  --prompts-file evals/prompts.example.jsonl \
+  --baseline-file evals/baseline_outputs.example.jsonl \
+  --reference-file evals/reference_outputs.example.jsonl \
+  --output-json outputs/eval_reference_impact.json \
+  --output-md outputs/eval_reference_impact.md
 ```
 
 ## Repository map
@@ -62,6 +98,7 @@ In practice (as used in the `Superpowering-Agents` MCP workflow), this corpus su
 - `scripts/ingest_reference_records.py`: imports external records and merges into corpus output.
 - `scripts/validate_corpus.py`: validates records against schema + controlled labels.
 - `scripts/05_retrieve.py`: retrieves top matching references for downstream prompting/orchestration.
+- `scripts/eval_reference_impact.py`: compares baseline outputs vs reference-backed outputs and reports win rate.
 - `schema.v1.json`: record contract for corpus entries.
 - `labels.v1.json`: controlled vocabulary for corpus dimensions.
 
