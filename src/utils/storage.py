@@ -78,6 +78,10 @@ def init_db(conn: sqlite3.Connection | None = None):
             visual_style        TEXT NOT NULL,
             quality_score       INTEGER NOT NULL,
             industry            TEXT,
+            industry_confidence REAL,
+            business_model      TEXT,
+            brand_tier          TEXT,
+            industry_style_profile TEXT,
             color_mode          TEXT,
             layout_pattern      TEXT,
             typography_style    TEXT,
@@ -92,6 +96,19 @@ def init_db(conn: sqlite3.Connection | None = None):
         CREATE INDEX IF NOT EXISTS idx_sites_status ON sites(status);
         CREATE INDEX IF NOT EXISTS idx_clusters_run ON clusters(run_id, cluster_id);
     """)
+
+    # Migrate existing DBs: add new columns if they don't exist yet
+    existing_cols = {row[1] for row in conn.execute("PRAGMA table_info(style_labels)").fetchall()}
+    migrations = [
+        ("industry_confidence", "REAL"),
+        ("business_model", "TEXT"),
+        ("brand_tier", "TEXT"),
+        ("industry_style_profile", "TEXT"),
+    ]
+    for col, col_type in migrations:
+        if col not in existing_cols:
+            conn.execute(f"ALTER TABLE style_labels ADD COLUMN {col} {col_type}")
+    conn.commit()
 
     if close:
         conn.close()
@@ -238,14 +255,18 @@ def store_style_label(conn: sqlite3.Connection, cluster_id: int, run_id: str,
     conn.execute(
         """INSERT INTO style_labels
            (cluster_id, run_id, page_type, visual_style, quality_score,
-            industry, color_mode, layout_pattern, typography_style,
+            industry, industry_confidence, business_model, brand_tier,
+            color_mode, layout_pattern, typography_style,
             design_era, target_audience, distinguishing_features, raw_response)
-           VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+           VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
            ON CONFLICT(cluster_id, run_id) DO UPDATE SET
             page_type=excluded.page_type,
             visual_style=excluded.visual_style,
             quality_score=excluded.quality_score,
             industry=excluded.industry,
+            industry_confidence=excluded.industry_confidence,
+            business_model=excluded.business_model,
+            brand_tier=excluded.brand_tier,
             color_mode=excluded.color_mode,
             layout_pattern=excluded.layout_pattern,
             typography_style=excluded.typography_style,
@@ -260,6 +281,9 @@ def store_style_label(conn: sqlite3.Connection, cluster_id: int, run_id: str,
             label_data.get("visual_style", ""),
             label_data.get("quality_score", 0),
             label_data.get("industry", ""),
+            label_data.get("industry_confidence"),
+            label_data.get("business_model", ""),
+            label_data.get("brand_tier", ""),
             label_data.get("color_mode", ""),
             label_data.get("layout_pattern", ""),
             label_data.get("typography_style", ""),
@@ -268,6 +292,32 @@ def store_style_label(conn: sqlite3.Connection, cluster_id: int, run_id: str,
             label_data.get("distinguishing_features", ""),
             raw_response,
         ),
+    )
+    conn.commit()
+
+
+def update_industry_fields(conn: sqlite3.Connection, cluster_id: int, run_id: str,
+                           industry: str, industry_confidence: float,
+                           business_model: str, brand_tier: str,
+                           industry_style_profile: str | None = None):
+    """Patch industry-related fields on an existing style label (used by reclassify pass)."""
+    conn.execute(
+        """UPDATE style_labels
+           SET industry=?, industry_confidence=?, business_model=?, brand_tier=?,
+               industry_style_profile=COALESCE(?, industry_style_profile)
+           WHERE cluster_id=? AND run_id=?""",
+        (industry, industry_confidence, business_model, brand_tier,
+         industry_style_profile, cluster_id, run_id),
+    )
+    conn.commit()
+
+
+def update_industry_style_profile(conn: sqlite3.Connection, cluster_id: int,
+                                   run_id: str, profile_key: str):
+    """Set the industry_style_profile key on an existing label."""
+    conn.execute(
+        "UPDATE style_labels SET industry_style_profile=? WHERE cluster_id=? AND run_id=?",
+        (profile_key, cluster_id, run_id),
     )
     conn.commit()
 
